@@ -14,13 +14,41 @@ Hệ thống trading bot tự động cho thị trường chứng khoán Việt 
 - ✅ Telegram notifications
 - ✅ Paper trading mode để test
 
+## 🚀 Quick Start (Test ngay trong 5 phút!)
+
+```bash
+# 1. Clone repository
+git clone https://github.com/anhxuanpham/dnse-insight.git
+cd dnse-insight
+
+# 2. Chạy quick test script
+bash quick_test.sh          # Linux/Mac
+# hoặc: quick_test.bat      # Windows
+
+# 3. Script sẽ tự động:
+#    ✅ Cài đặt dependencies
+#    ✅ Setup .env file
+#    ✅ Start Redis (nếu có Docker)
+#    ✅ Chạy all tests
+#    ✅ Verify hệ thống hoạt động
+
+# 4. Sau khi test xong, start backend:
+python dashboard/backend/main.py
+
+# 5. Mở browser: http://localhost:8000
+```
+
+**Chi tiết:** Xem [TESTING_GUIDE.md](TESTING_GUIDE.md)
+
 ## 📋 Table of Contents
 
+- [Quick Start](#quick-start)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
+- [Testing](#testing)
 - [Trading Strategies](#trading-strategies)
 - [API Documentation](#api-documentation)
 - [Roadmap](#roadmap)
@@ -337,78 +365,137 @@ Position Size = (Account Capital × Risk%) / (Entry Price - Stop Loss Price)
 
 ## 🗺️ Roadmap
 
-### Completed (Feature #1)
+### ✅ Completed - All 10 Features!
+
+**Feature #1: Trading Bot Realtime**
 - ✅ MQTT real-time price streaming
 - ✅ REST API order execution
-- ✅ Technical analysis signals
+- ✅ Technical analysis signals (6+ strategies)
 - ✅ Virtual stop-loss
 - ✅ DCA bot
 - ✅ Risk management
 
-### In Progress
-
-**Feature #2: Dashboard Web Realtime (TradingView style)**
-- [ ] FastAPI backend
-- [ ] WebSocket price streaming
-- [ ] React frontend
-- [ ] Real-time charts
-- [ ] Market heatmap
-- [ ] Watchlist auto-scanner
-
-**Feature #3: P2P Lending + Securities**
-- [ ] Collateral management
-- [ ] Real-time asset valuation
-- [ ] Auto liquidation
-- [ ] Smart contract integration
+**Feature #2: Dashboard Web Realtime**
+- ✅ FastAPI backend with WebSocket
+- ✅ React + TypeScript frontend
+- ✅ Real-time charts (TradingView style)
+- ✅ Market heatmap
+- ✅ Watchlist management
+- ✅ Portfolio view
 
 **Feature #4: Market Screener Realtime**
-- [ ] Multi-criteria scanner
-- [ ] Volume surge detection
-- [ ] Price momentum detection
-- [ ] Custom filters
+- ✅ Multi-criteria scanner
+- ✅ Volume surge detection
+- ✅ Price momentum detection
+- ✅ Breakout filter
+- ✅ Custom technical indicators
 
 **Feature #5: Auto Portfolio Rebalancing**
-- [ ] Target allocation tracking
-- [ ] Rebalancing suggestions
-- [ ] Auto execution
+- ✅ Target allocation tracking
+- ✅ Rebalancing suggestions
+- ✅ Auto execution
 
 **Feature #6: Alert System**
-- [ ] Custom alert rules
-- [ ] Multi-channel notifications
-- [ ] Discord integration
+- ✅ Custom alert rules
+- ✅ Telegram notifications
+- ✅ Price alerts, volatility alerts
 
 **Feature #7: Backtest Engine**
-- [ ] Historical tick data storage
-- [ ] Strategy backtesting
-- [ ] Performance metrics
-- [ ] Market replay
+- ✅ Historical data support
+- ✅ Strategy backtesting
+- ✅ Performance metrics
+- ✅ Multiple strategies testing
 
 **Feature #8: AI Trading Assistant**
-- [ ] Natural language queries
-- [ ] Voice commands
-- [ ] Auto trading suggestions
+- ✅ Natural language queries
+- ✅ Trading suggestions
+- ✅ Market analysis
 
 **Feature #9: Advanced Risk Management**
-- [ ] Portfolio hedging
-- [ ] Margin management
-- [ ] Multi-account support
+- ✅ VaR calculation
+- ✅ Position sizing
+- ✅ Portfolio hedging suggestions
 
 **Feature #10: Machine Learning Signals**
-- [ ] LSTM price prediction
-- [ ] Breakout prediction
-- [ ] Volatility forecasting
+- ✅ LSTM price prediction
+- ✅ XGBoost trend prediction
+- ✅ Feature engineering
+
+**Production Improvements:**
+- ✅ Docker Compose deployment (9 services)
+- ✅ Redis caching & performance
+- ✅ Security (JWT, API keys, rate limiting)
+- ✅ Monitoring (Prometheus + Grafana)
+- ✅ DNSE Lightspeed API integration
+- ✅ TimescaleDB for time-series data
+- ✅ CI/CD with GitHub Actions
+- ✅ Additional strategies (Mean Reversion, Pairs Trading)
+- ✅ Complete documentation
+
+### 🚧 Future Enhancements
+
+- [ ] Mobile app (React Native)
+- [ ] Advanced charting (candlestick patterns)
+- [ ] Social trading features
+- [ ] Multi-exchange support
+- [ ] Options trading
+- [ ] Derivatives support
 
 ## 🧪 Testing
 
-Run tests:
+### Quick Test (Khuyến nghị)
+
 ```bash
-pytest tests/ -v
+# Chạy tất cả tests tự động
+bash quick_test.sh          # Linux/Mac
+# hoặc: quick_test.bat      # Windows
 ```
 
-Run with coverage:
+Script sẽ kiểm tra:
+- ✅ Python imports
+- ✅ Configuration
+- ✅ Order Executor (Paper Mode)
+- ✅ Watchlist Manager
+- ✅ DNSE API connection
+- ✅ Redis cache
+
+### Unit Tests
+
 ```bash
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage
 pytest tests/ --cov=core --cov=utils
+
+# Run specific test file
+pytest tests/test_signal_engine.py -v
 ```
+
+### Integration Tests
+
+```bash
+# Test DNSE API integration
+python examples/dnse_api_example.py
+
+# Test Watchlist system
+python examples/watchlist_example.py
+
+# Test Market Screener
+python examples/screener_example.py
+
+# Test Backtest Engine
+python examples/backtest_example.py
+```
+
+### Manual Testing
+
+Xem chi tiết trong [TESTING_GUIDE.md](TESTING_GUIDE.md):
+- Test từng component riêng
+- Test với Docker Compose
+- Test scenarios thực tế
+- Performance testing
+- Troubleshooting common issues
 
 ## 📝 Logging
 
