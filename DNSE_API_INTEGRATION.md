@@ -8,6 +8,19 @@ Hệ thống đã tích hợp **đầy đủ** API của DNSE theo tài liệu c
 
 ## 📋 Danh sách API đã tích hợp
 
+### 0️⃣ **Authentication API** (Xác thực) - MỚI! 🔥
+
+| API | Endpoint | File | Mô tả |
+|-----|----------|------|-------|
+| **Login** | `POST /auth-service/login` | `core/dnse_api_client.py:52` | Đăng nhập lấy JWT token (8h expiry) |
+
+**Token features:**
+- ✅ JWT token với thời gian sống 8 giờ
+- ✅ Auto-refresh trước khi hết hạn (5 phút buffer)
+- ✅ Cache trong Redis (7h 45min)
+- ✅ Tự động parse user info từ token payload
+- ✅ Seamless re-authentication
+
 ### 1️⃣ **Market Data APIs** (Dữ liệu thị trường)
 
 | API | Endpoint | File | Mô tả |
@@ -69,10 +82,63 @@ Hệ thống đã tích hợp **đầy đủ** API của DNSE theo tài liệu c
 
 ## 🔐 Authentication (Xác thực)
 
-Tất cả API sử dụng **HMAC-SHA256** signature:
+Hệ thống hỗ trợ **2 phương thức xác thực**:
+
+### Phương thức 1: Token-based Authentication (Khuyến nghị) 🔥
+
+**Login API để lấy JWT token:**
 
 ```python
-# core/dnse_api_client.py:35-43
+from core.dnse_api_client import dnse_client
+
+# Cách 1: Auto-login khi khởi tạo (credentials trong .env)
+# Tự động login nếu có DNSE_USERNAME và DNSE_PASSWORD
+
+# Cách 2: Manual login
+result = dnse_client.login(
+    username="064CYIDYCG",  # Custody code
+    password="your_password"
+)
+
+# Response:
+# {
+#     "success": True,
+#     "token": "eyJ0eXAiOiJKV1QiLCJhbGci...",
+#     "roles": ["investor"],
+#     "isNeedReset": False
+# }
+```
+
+**Token được sử dụng tự động:**
+- Header: `Authorization: Bearer {token}`
+- Thời gian sống: 8 giờ
+- Auto-refresh: Trước khi hết hạn 5 phút
+- Cache: Redis với TTL 7h 45min
+
+**Token payload (JWT):**
+```json
+{
+  "identificationCode": "052097000150",
+  "sub": "1002017948",
+  "roles": ["investor"],
+  "investorId": "1002017948",
+  "fullName": "Phạm Anh Xuân",
+  "sessionId": "6db7e101-0e29-4f1c-821b-3ba9f64ea334",
+  "userId": "6a66e94a-ca23-4771-b04b-03459a499804",
+  "customerEmail": "anhxuanpham@hotmail.com",
+  "custodyCode": "064CYIDYCG",
+  "customerId": "000330220",
+  "exp": 1763163580,  // 8h from login
+  "customerMobile": "0904470419",
+  "iat": 1763134780,
+  "username": "064CYIDYCG",
+  "status": "ACTIVE"
+}
+```
+
+### Phương thức 2: HMAC-SHA256 Signature (Fallback)
+
+```python
 def _generate_signature(self, method: str, path: str, timestamp: str, body: str = "") -> str:
     message = f"{timestamp}{method}{path}{body}"
     signature = hmac.new(
@@ -88,6 +154,16 @@ def _generate_signature(self, method: str, path: str, timestamp: str, body: str 
 - `X-SIGNATURE`: HMAC signature
 - `X-TIMESTAMP`: Unix timestamp (milliseconds)
 
+### Chọn phương thức nào?
+
+| Feature | Token Auth | HMAC Auth |
+|---------|-----------|-----------|
+| **Dễ sử dụng** | ✅ Rất dễ | ⚠️ Phức tạp hơn |
+| **Setup** | Username/Password | API Key/Secret |
+| **Expiry** | 8 giờ (auto-refresh) | Không hết hạn |
+| **Security** | ✅ JWT standard | ✅ HMAC-SHA256 |
+| **Khuyến nghị** | ✅ Dùng cho production | Fallback |
+
 ---
 
 ## 💻 Cách sử dụng
@@ -100,27 +176,84 @@ cp .env.example .env
 ```
 
 2. **Điền thông tin API** (lấy từ DNSE):
+
+**Option 1: Token Authentication (Khuyến nghị)**
 ```bash
 # DNSE API Configuration
 DNSE_API_BASE_URL=https://api.dnse.com.vn
-DNSE_API_KEY=your_api_key_here          # Lấy từ DNSE
-DNSE_API_SECRET=your_api_secret_here    # Lấy từ DNSE
-DNSE_ACCOUNT_ID=your_account_id_here    # Mã tài khoản
+DNSE_AUTH_URL=https://api.dnse.com.vn/auth-service
 
-# MQTT Configuration
-MQTT_BROKER=mqtt.dnse.com.vn
-MQTT_PORT=1883
-MQTT_USERNAME=your_mqtt_username         # Lấy từ DNSE
-MQTT_PASSWORD=your_mqtt_password         # Lấy từ DNSE
+# Token-based Authentication (Login API)
+DNSE_USERNAME=064CYIDYCG              # Custody code (mã lưu ký)
+DNSE_PASSWORD=your_password           # Password DNSE của bạn
 
 # Trading Mode
 TRADING_MODE=paper  # paper hoặc live
+```
+
+**Option 2: HMAC Authentication (Fallback)**
+```bash
+# DNSE API Configuration
+DNSE_API_BASE_URL=https://api.dnse.com.vn
+
+# HMAC Authentication
+DNSE_API_KEY=your_api_key_here          # API Key từ DNSE
+DNSE_API_SECRET=your_api_secret_here    # API Secret từ DNSE
+DNSE_ACCOUNT_ID=your_account_id_here    # Customer ID
+
+# Trading Mode
+TRADING_MODE=paper  # paper hoặc live
+```
+
+**Lấy credentials từ đâu?**
+- **Username/Password**: Đăng nhập DNSE của bạn
+- **Custody Code**: Mã lưu ký (hiển thị trên app DNSE)
+- **API Key/Secret**: Tạo trong Settings > API Management (nếu có)
+
+### Example 0: Login và Token Management (MỚI!)
+
+```python
+from core.dnse_api_client import dnse_client
+
+# Cách 1: Auto-login (credentials trong .env)
+# Đã tự động login khi import nếu có DNSE_USERNAME và DNSE_PASSWORD
+
+# Kiểm tra token
+print(f"Token: {dnse_client.token[:50]}...")
+print(f"Expires at: {dnse_client.token_expires_at}")
+print(f"Is valid: {dnse_client._is_token_valid()}")
+
+# Cách 2: Manual login
+result = dnse_client.login(
+    username="064CYIDYCG",
+    password="your_password"
+)
+
+if result.get("success"):
+    print(f"✅ Login successful!")
+    print(f"Token: {result['token'][:50]}...")
+    print(f"Roles: {result['roles']}")
+    print(f"User: {dnse_client._get_token_field('fullName')}")
+    print(f"Customer ID: {dnse_client._get_token_field('customerId')}")
+else:
+    print(f"❌ Login failed: {result.get('error')}")
+
+# Token tự động refresh khi gần hết hạn
+# Không cần làm gì, dnse_client tự động handle!
+```
+
+**Chạy demo:**
+```bash
+python examples/dnse_login_example.py
 ```
 
 ### Example 1: Lấy giá cổ phiếu
 
 ```python
 from core.dnse_api_client import dnse_client
+
+# Token được tự động sử dụng cho tất cả API calls
+# Không cần truyền token thủ công!
 
 # Lấy giá VCB
 price_data = dnse_client.get_stock_price("VCB")
