@@ -18,12 +18,19 @@ from core.order_executor import order_executor
 from utils.config import settings
 
 
+# Import watchlist router
+from dashboard.backend.watchlist_api import router as watchlist_router
+
+
 # FastAPI app
 app = FastAPI(
     title="DNSE Insight Dashboard API",
     description="Real-time trading dashboard for Vietnamese stock market",
     version="1.0.0",
 )
+
+# Include watchlist routes
+app.include_router(watchlist_router)
 
 # CORS middleware
 app.add_middleware(
