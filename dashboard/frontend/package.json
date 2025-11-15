@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Real-time trading dashboard for DNSE Insight",
   "private": true,
+  "type": "module",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
