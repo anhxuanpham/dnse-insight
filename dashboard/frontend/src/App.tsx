@@ -8,6 +8,46 @@ function App() {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('VCB')
   const [view, setView] = useState<'dashboard' | 'watchlist' | 'chart' | 'heatmap'>('dashboard')
 
+  // Mock data for demo
+  const mockWatchlistData = [
+    {
+      symbol: 'VCB',
+      price: 95.5,
+      change_percent: 2.3,
+      volume: 1250000,
+      signal: { signal_type: 'BUY', strength: 0.8, reason: 'Breakout resistance at 95.0' }
+    },
+    {
+      symbol: 'VHM',
+      price: 42.8,
+      change_percent: -1.2,
+      volume: 890000,
+      signal: { signal_type: 'SELL', strength: 0.6, reason: 'Below support level' }
+    },
+    {
+      symbol: 'HPG',
+      price: 28.5,
+      change_percent: 0.5,
+      volume: 2100000,
+      signal: null
+    },
+    {
+      symbol: 'FPT',
+      price: 118.2,
+      change_percent: 1.8,
+      volume: 560000,
+      signal: { signal_type: 'BUY', strength: 0.7, reason: 'Strong momentum' }
+    }
+  ]
+
+  const mockChartData = [
+    { time: '2024-01-01', open: 93, high: 94, low: 92, close: 93.5 },
+    { time: '2024-01-02', open: 93.5, high: 95, low: 93, close: 94.5 },
+    { time: '2024-01-03', open: 94.5, high: 96, low: 94, close: 95.5 },
+    { time: '2024-01-04', open: 95.5, high: 97, low: 95, close: 96.2 },
+    { time: '2024-01-05', open: 96.2, high: 98, low: 96, close: 97.5 }
+  ]
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
@@ -73,12 +113,12 @@ function App() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left: Watchlist */}
             <div className="lg:col-span-1">
-              <Watchlist onSelectSymbol={setSelectedSymbol} />
+              <Watchlist items={mockWatchlistData} onSymbolClick={setSelectedSymbol} />
             </div>
 
             {/* Right: Chart + Info */}
             <div className="lg:col-span-2 space-y-6">
-              <TradingChart symbol={selectedSymbol} />
+              <TradingChart symbol={selectedSymbol} data={mockChartData} />
 
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-4">
@@ -111,7 +151,7 @@ function App() {
 
         {view === 'chart' && (
           <div className="max-w-7xl mx-auto">
-            <TradingChart symbol={selectedSymbol} />
+            <TradingChart symbol={selectedSymbol} data={mockChartData} />
           </div>
         )}
 
